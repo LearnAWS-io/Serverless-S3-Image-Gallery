@@ -1,16 +1,22 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as cdk from "aws-cdk-lib";
+import { FunctionUrlAuthType } from "aws-cdk-lib/aws-lambda";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { Construct } from "constructs";
 
 export class CdkLambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const myLambdaFn = new NodejsFunction(this, "my-cdk-lambda-fn", {
+      entry: "./lambda/hello-aws.ts",
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'CdkLambdaQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const fnUrl = myLambdaFn.addFunctionUrl({
+      authType: FunctionUrlAuthType.NONE,
+    });
+
+    new cdk.CfnOutput(this, "function-url", {
+      value: fnUrl.url,
+    });
   }
 }
