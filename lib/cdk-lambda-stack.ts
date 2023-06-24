@@ -1,3 +1,5 @@
+import { HttpApi } from "@aws-cdk/aws-apigatewayv2-alpha";
+import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import * as cdk from "aws-cdk-lib";
 import { FunctionUrlAuthType } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
@@ -12,21 +14,28 @@ export class CdkLambdaStack extends cdk.Stack {
       bucketName: "awsome-imgsss",
     });
 
-    const myLambdaFn = new NodejsFunction(this, "my-cdk-lambda-fn", {
-      entry: "./lambda/hello-aws.ts",
+    const listImagesFn = new NodejsFunction(this, "my-cdk-lambda-fn", {
+      entry: "./lambda/list-images-fn.ts",
       environment: {
         BUCKET_NAME: myImgGalleryBuck.bucketName,
       },
     });
 
-    myImgGalleryBuck.grantRead(myLambdaFn);
+    myImgGalleryBuck.grantRead(listImagesFn);
 
-    const fnUrl = myLambdaFn.addFunctionUrl({
-      authType: FunctionUrlAuthType.NONE,
+    const listImgLambdaInteg = new HttpLambdaIntegration(
+      "image-list",
+      listImagesFn
+    );
+
+    const apiGw = new HttpApi(this, "img-gallery-api-gw", {
+      apiName: "my-image-gallery",
+      // what to do when visiting root - /
+      defaultIntegration: listImgLambdaInteg,
     });
 
     new cdk.CfnOutput(this, "function-url", {
-      value: fnUrl.url,
+      value: apiGw.url ?? "no url",
     });
   }
 }
