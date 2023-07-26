@@ -30,6 +30,7 @@
     "@vinejs/vine": "^1.4.1",
     "aws-cdk-lib": "2.85.0",
     "constructs": "^10.0.0",
+    "handlebars": "^4.7.7",
     "source-map-support": "^0.5.21"
   }
 }
